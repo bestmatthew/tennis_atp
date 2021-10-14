@@ -1,45 +1,75 @@
-## ATP Tennis Rankings, Results, and Stats
+# OVERVIEW #
 
-This contains my master ATP player file, historical rankings, results, and match stats.
+A series of experiments using various types of data on random forrests to predict the outcome of tennis matches.
 
-The player file columns are player_id, first_name, last_name, hand, birth_date, country_code.
+# DATA # 
 
-The columns for the ranking files are ranking_date, ranking, player_id, ranking_points (where available).
+Initially built a dataframe of ~ 15,000 ATP matches from a Jeff Slackmann database containing match attributes (like court surface, tournament level, and sets played) as well as player "measureables" (age, dexterity, rank, etc) of men's tennis players from all matches from 2011-2015. A vast majority of Slackmann's data were too specific and therefore not usable for making predictions. For example, knowing the number of aces the winner or loser scores isn't something I can reliably use for predicting an unseen match. Match attributes like court surface & tournament type (Master, Qualififiers, Challenger, Tour500, etc.) were one-hot encoded for prediction.
 
-ATP rankings are mostly complete from 1985 to the present. 1982 is missing, and rankings from 1973-1984 are only intermittent.
 
-Results and stats: There are up to three files per season: One for tour-level main draw matches (e.g. 'atp_matches_2014.csv'), one for tour-level qualifying and challenger main-draw matches, and one for futures matches.
+# "CHALLENGES" FROM THE DATA #
 
-Most of the columns in the results files are self-explanatory. I've also included a matches_data_dictionary.txt file to spell things out a bit more.
+The Slackmann dataset was organized by winner and labeled accordingly. This meant that the winner's info was always provided first and the loser's info was always provided second. As a random forrest looks for patterns, this seemed to present a fairly obvious one. The first player wins 100% of the time. 
 
-To make the results files easier for more people to use, I've included a fair bit of redundancy with the biographical and ranking files: each row contains several columns of biographical information, along with ranking and ranking points, for both players. Ranking data, as well as age, are as of tourney_date, which is almost always the Monday at or near the beginning of the event.
+To combat this, I shuffled the data using the Bernoulli distribution. That is, flipped a coin and then shuffled them or left the information alone, making note of which were changed and which were unchanged. This was then applied to each and every match in preparation for the random forrest predictions. 
+[slide goes here ]
 
-MatchStats are included where I have them. In general, that means 1991-present for tour-level matches, 2008-present for challengers, and 2011-present for tour-level qualifying. The MatchStats columns should be self-explanatory, but they might not be what you're used to seeing; it's all integer totals (e.g. 1st serves in, not 1st serve percentage), from which traditional percentages can be calculated.
 
-There are some tour-level matches with missing stats. Some are missing because ATP doesn't have them. Others I've deleted because they didn't pass some sanity check (loser won 60% of points, or match time was under 20 minutes, etc). Also, Davis Cup matches are included in the tour-level files, but there are no stats for Davis Cup matches until the last few seasons.
+[magic flip slide goes here]
 
-# Doubles
 
-I've added tour-level doubles back to 2000. Filenames follow the convention atp_matches_doubles_yyyy.csv. I may eventually be able to add tour-level doubles from before 2000, as well as lower-level doubles for some years. Most of the columns are the same, though in a different order.
+'''python
 
-Doubles updates are temporarily suspended as of late 2020.
+updatereversedorder = [
+    'clay', 'grass', 'hard',
+    'A', 'D', 'F', 'G', 'M', 'best_of', 
+    'loser_ht', 'loser_age','loser_rank','L2', 'R2', 'U2', 
+    'winner_ht', 'winner_age','winner_rank', 'L1', 'R1', 'U1']
 
-# Contributing
+def updateflipornotnewframe(row):
+    newframe = []
+    flip = np.random.choice([0,1], p=[0.5,0.5])
+    
+    if flip == 0: #player info does not shuffle, player A is winner (default)
+        row['result'] = 0
+        newframe.append(row)
+        
+    else:   #winner info goes into player B spot
+        row = row.reindex(updatereversedorder)
+        row['result'] = 1
+        newframe.append(row)
+        
+    #rename here
+    #holder = dict(zip(row.index[-len(keys):], keys))
+    #return row.rename(matchatt.update(holder))
+    return pd.DataFrame(newframe)
+'''
 
-If you find a bug, please file an issue, and be as specific as possible.
+After establishing several baselines (flipping a coin, betting the underdog, choose the higher-ranked player) it was clear that I had reached a dead end.
 
-Feel free to correct bugs or fill in missing data via pull requests, but be aware that I will not merge PRs. But if that's the most convenient way for you to submit improvements to the data, that's fine; I can work with that.
+Conclusion: there's no reliable pattern in ranking, age, height, dexterity, etc for predicting matches. 
 
-If you'd like to contribute to the project, I post "help wanted" [issues](https://github.com/JeffSackmann/tennis_atp/issues), starting with a plea to fill in biographical data such as date of birth.
+# INCORPORATING ODDS-MAKERS' DATA #
 
-Also, I encourage everyone to pitch in to the [Match Charting Project](https://github.com/JeffSackmann/tennis_MatchChartingProject) by charting pro matches. It's not a direct contribution to this repo, but it is a great way to improve the existing state of tennis data.
 
-# Attention
+After seeing random forrest results, a second dataframe was constructed, ditching player "measureables" for various odds-makers data and aggregate odds. The two "most-complete" sets of odds-makers odds were used, along with the average.
 
-Please read, understand, and abide by the license below. It seems like a reasonable thing to ask, given the hundreds of hours I've put into amassing and maintaining this dataset. Unfortunately, a few bad apples have violated the license, and when people do that, it makes me considerably less motivated to continue updating.
+# INSIGHTS #
 
-Also, if you're using this for academic/research purposes (great!), take a minute and cite it properly. It's not that hard, it helps others find a useful resource, and let's face it, you should be doing it anyway.
+Almost immedately it became apparent that the odds-makers agree in unison and unanimity. 
 
+**Surely** there's bound to be a difference of opinion -- it is purely opinion -- between bookmakers over tens of thousands of matches? While the actual odds vary, the likely winner (and loser) are identical across bookmakers. It looked like their overall accuracy, over ~15000 matches, sat at an impressive 67% accuracy.
+
+Armed with this knowledge, I set out to explore if we could use implied odds to be the underdogs on favorable matches to form a profitable betting strategy. 
+
+
+
+
+
+
+
+
+Data provided by Jeff Slackmann:
 # License
 
 <a rel="license" href="http://creativecommons.org/licenses/by-nc-sa/4.0/"><img alt="Creative Commons License" style="border-width:0" src="https://i.creativecommons.org/l/by-nc-sa/4.0/88x31.png" /></a><br /><span xmlns:dct="http://purl.org/dc/terms/" href="http://purl.org/dc/dcmitype/Dataset" property="dct:title" rel="dct:type">Tennis databases, files, and algorithms</span> by <a xmlns:cc="http://creativecommons.org/ns#" href="http://www.tennisabstract.com/" property="cc:attributionName" rel="cc:attributionURL">Jeff Sackmann / Tennis Abstract</a> is licensed under a <a rel="license" href="http://creativecommons.org/licenses/by-nc-sa/4.0/">Creative Commons Attribution-NonCommercial-ShareAlike 4.0 International License</a>.<br />Based on a work at <a xmlns:dct="http://purl.org/dc/terms/" href="https://github.com/JeffSackmann" rel="dct:source">https://github.com/JeffSackmann</a>.
