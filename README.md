@@ -9,13 +9,11 @@ Initially built a dataframe of ~ 15,000 ATP matches from a Jeff Slackmann databa
 
 # "CHALLENGES" FROM THE DATA #
 
-The Slackmann dataset was organized by winner and labeled accordingly. This meant that the winner's info was always provided first and the loser's info was always provided second. As a random forrest looks for patterns, this seemed to present a fairly obvious one. The first player wins 100% of the time. 
+The Slackmann dataset was organized by winner and labeled accordingly. This meant that the winner's info was always provided first and the loser's info was always provided second. Considering that a random forrest looks for patterns, the data seemed to present an issue: the first player wins 100% of the time. 
 
 To combat this, I shuffled the data using the Bernoulli distribution. That is, flipped a coin and then shuffled them or left the information alone, making note of which were changed and which were unchanged. This was then applied to each and every match in preparation for the random forrest predictions. 
+
 ![datasetA](./data/tennispics/dataset_a.png)
-
-[magic flip slide goes here]
-
 
 ```python
 updatereversedorder = [
@@ -37,29 +35,33 @@ def updateflipornotnewframe(row):
         row['result'] = 1
         newframe.append(row)
         
-    #rename here
-    #holder = dict(zip(row.index[-len(keys):], keys))
-    #return row.rename(matchatt.update(holder))
+
     return pd.DataFrame(newframe)
 ```
 
 
 After establishing several baselines (flipping a coin, betting the underdog, choose the higher-ranked player) it was clear that I had reached a dead end.
+![baselines](./data/tennispics/baselines.png)
 
-Conclusion: there's no reliable pattern in ranking, age, height, dexterity, etc for predicting matches. 
+Conclusion: there's no reliable pattern in ATP ranking, age, height, dexterity, etc for predicting match outcome.  
 
 # INCORPORATING ODDS-MAKERS' DATA #
 
 
 After seeing random forrest results, a second dataframe was constructed, ditching player "measureables" for various odds-makers data and aggregate odds. The two "most-complete" sets of odds-makers odds were used, along with the average.
 
+![datasetB](.data/tennispics/dataset_b.png)
+
+
 # INSIGHTS #
 
 Almost immedately it became apparent that the odds-makers agree in unison and unanimity. 
 
-**Surely** there's bound to be a difference of opinion -- it is purely opinion -- between bookmakers over tens of thousands of matches? While the actual odds vary, the likely winner (and loser) are identical across bookmakers. It looked like their overall accuracy, over ~15000 matches, sat at an impressive 67% accuracy.
+**Surely** there's bound to be a difference of opinion -- and it is purely opinion -- between bookmakers over tens of thousands of matches? While the actual odds vary, the likely winner (and loser) are identical across bookmakers. It looked like their overall accuracy, over ~15000 matches, sat at an impressive 67% accuracy.
 
-Armed with this knowledge, I set out to explore if we could use implied odds to be the underdogs on favorable matches to form a profitable betting strategy. 
+Armed with this knowledge, I set out to explore if we could use implied odds to be the underdogs on favorable matches to form a profitable betting strategy.
+
+My progress in teaching a computer how to bet can be seen in the upcomming "betting" directory I'm currently working on. Thanks! 
 
 
 
