@@ -18,8 +18,7 @@ To combat this, I shuffled the data using the Bernoulli distribution. That is, f
 [magic flip slide goes here]
 
 
-'''python
-
+```python
 updatereversedorder = [
     'clay', 'grass', 'hard',
     'A', 'D', 'F', 'G', 'M', 'best_of', 
@@ -43,7 +42,8 @@ def updateflipornotnewframe(row):
     #holder = dict(zip(row.index[-len(keys):], keys))
     #return row.rename(matchatt.update(holder))
     return pd.DataFrame(newframe)
-'''
+```
+
 
 After establishing several baselines (flipping a coin, betting the underdog, choose the higher-ranked player) it was clear that I had reached a dead end.
 
