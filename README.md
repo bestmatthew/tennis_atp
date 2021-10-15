@@ -12,8 +12,7 @@ Initially built a dataframe of ~ 15,000 ATP matches from a Jeff Slackmann databa
 The Slackmann dataset was organized by winner and labeled accordingly. This meant that the winner's info was always provided first and the loser's info was always provided second. As a random forrest looks for patterns, this seemed to present a fairly obvious one. The first player wins 100% of the time. 
 
 To combat this, I shuffled the data using the Bernoulli distribution. That is, flipped a coin and then shuffled them or left the information alone, making note of which were changed and which were unchanged. This was then applied to each and every match in preparation for the random forrest predictions. 
-[slide goes here ]
-
+![datasetA](./data/tennispics/dataset_a.png)
 
 [magic flip slide goes here]
 
